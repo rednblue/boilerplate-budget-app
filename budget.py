@@ -4,6 +4,7 @@ class Category:
     self.category = category
     self.ledger = []
     self.balance = 0
+    self.spent = 0
   
   def __str__(self):
     output = ""
@@ -17,7 +18,7 @@ class Category:
       output += entry["description"][:23] + (" " * (23 - len(entry["description"][:23])))
       output += " "
       a = format(entry["amount"], '.2f')
-      output += " " * (7 - len(str(a))) + a + "\n"
+      output += " " * (6 - len(str(a))) + a + "\n"
     
     output += "Total: " + str(self.balance)
     return output
@@ -37,6 +38,7 @@ class Category:
         description = ""
       self.ledger.append({"amount":-amount,"description":description})
       self.balance -= amount
+      self.spent += amount
       return True
     return False
 
@@ -65,22 +67,22 @@ def create_spend_chart(categories):
   total = 0
 
   for c in categories:
-    spent.append(c.balance)
+    spent.append(c.spent)
     lens.append(len(c.category))
-    total += c.balance
-
+    total += c.spent
+  
   maxL = max(lens)
 
   for i in range(len(spent)):
     spent[i] = approximate_10(int((spent[i] / total) * 100))
 
-  for i in range(100, 0, -10):
+  for i in range(100, -1, -10):
     output += " " * (3 - len(str(i))) + str(i) + "| "
     for j in spent:
       if j >= i:
-        output += "o "
+        output += "o  "
       else:
-        output += " " * 2
+        output += " " * 3
     output += "\n"
 
   output += (" " * 4) + "----------" + "\n"
@@ -89,18 +91,15 @@ def create_spend_chart(categories):
     output += (" " * 5)
     for c in categories:
       try:
-        output += c.category[i] + " "
+        output += c.category[i] + "  "
       except:
-        output += " " * 2
+        output += " " * 3
     output += "\n"
 
   #print(spent)
 
-  return output
+  return output[:-1]
 
 def approximate_10(n):
-  #print(n)
   r = n % 10
-  if r < 5:
-    return n - r
-  return n - r + 10
+  return n - r
